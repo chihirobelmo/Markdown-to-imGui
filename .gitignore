@@ -1,0 +1,8 @@
+#ignore vs files
+.vs/
+packages/
+bin/
+obj/
+Debug/
+Release/
+*.csproj.user
