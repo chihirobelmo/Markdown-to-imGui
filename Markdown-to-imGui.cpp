@@ -39,22 +39,57 @@ void* GImGuiDemoMarkerCallback2UserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback2 != NULL) GImGuiDemoMarkerCallback2(__FILE__, __LINE__, section, GImGuiDemoMarkerCallback2UserData); } while (0)
 
 
-void write(std::vector<std::string> lines)
+int write(std::vector<std::string> lines, int start)
 {
-    int i = 0;
-    int crntChptIndx = -1;
+    int i = start;
+    int crntChptrName = -1;
     bool flg = true;
+    bool node = true;
 
     while (i < (int)lines.size())
     {
-        if (lines[i].c_str()[0] == '#')
+        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] != '#')
         {
-            IMGUI_DEMO_MARKER(lines[i].c_str());
-            crntChptIndx = i;
-            flg = ImGui::CollapsingHeader(lines[crntChptIndx].c_str());
+            IMGUI_DEMO_MARKER(lines[i].replace(0,1,"").c_str());
+            flg = ImGui::CollapsingHeader(lines[i].replace(0, 1, "").c_str());
+            node = true;
+            crntChptrName = i;
             i++;
+            continue;
         }
         if (!flg)
+        {
+            i++;
+            continue;
+        }
+        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] == '#')
+        {
+            IMGUI_DEMO_MARKER((lines[crntChptrName].replace(0, 1, "") + "/" + lines[i].replace(0, 2, "")).c_str());
+            node = ImGui::TreeNode(lines[i].replace(0, 2, "").c_str());
+            if (node)
+            {
+                i++;
+                while (i < (int)lines.size())
+                {
+                    if (lines[i].size() > 1 && lines[i].c_str()[0] == '#')
+                    {
+                        break;
+                    }
+                    if (lines[i].c_str()[0] == '-')
+                    {
+                        ImGui::BulletText(lines[i].c_str());
+                        i++;
+                        continue;
+                    }
+                    ImGui::Text(lines[i].c_str());
+                    i++;
+                    continue;
+                }
+                ImGui::TreePop();
+            }
+            continue;
+        }
+        if (!node)
         {
             i++;
             continue;
@@ -69,6 +104,8 @@ void write(std::vector<std::string> lines)
         i++;
         continue;
     }
+
+    return i;
 }
 
 // Data
@@ -178,7 +215,7 @@ int main(int, char**)
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-            write(lines);
+            write(lines,0);
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
