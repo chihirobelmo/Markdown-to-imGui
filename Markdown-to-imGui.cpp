@@ -14,6 +14,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <deque>
+
+std::deque<bool> check;
 
 std::vector<std::string> read()
 {
@@ -28,6 +31,9 @@ std::vector<std::string> read()
     while (getline(ifs, str)) {
         lines.push_back(str);
     }
+
+    check.resize(lines.size());
+
     return lines;
 }
 
@@ -71,11 +77,17 @@ int write(std::vector<std::string> lines, int start)
                 i++;
                 while (i < (int)lines.size())
                 {
-                    if (lines[i].size() > 1 && lines[i].c_str()[0] == '#')
+                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '#')
                     {
                         break;
                     }
-                    if (lines[i].c_str()[0] == '-')
+                    if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
+                    {
+                        ImGui::Checkbox(lines[i].replace(0, 2, "").c_str(), &check[i]);
+                        i++;
+                        continue;
+                    }
+                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
                     {
                         ImGui::BulletText(lines[i].c_str());
                         i++;
@@ -94,7 +106,13 @@ int write(std::vector<std::string> lines, int start)
             i++;
             continue;
         }
-        if (lines[i].c_str()[0] == '-')
+        if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
+        {
+            ImGui::Checkbox(lines[i].replace(0,2,"").c_str(), &check[i]);
+            i++;
+            continue;
+        }
+        if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
         {
             ImGui::BulletText(lines[i].c_str());
             i++;

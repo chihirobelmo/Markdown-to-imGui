@@ -1,4 +1,9 @@
 Start
+
+[]1
+[]2
+[]3
+
 # 1st Sweep: Before starting the engine
 Looking towards the back of the left console, 
 we start by setting the systems correctly, 
