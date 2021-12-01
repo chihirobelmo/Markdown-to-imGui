@@ -44,6 +44,23 @@ ImGuiDemoMarkerCallback         GImGuiDemoMarkerCallback2 = NULL;
 void* GImGuiDemoMarkerCallback2UserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback2 != NULL) GImGuiDemoMarkerCallback2(__FILE__, __LINE__, section, GImGuiDemoMarkerCallback2UserData); } while (0)
 
+int write_sentence(std::vector<std::string> lines, int start) 
+{
+    int i = start;
+
+    if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
+    {
+        ImGui::Checkbox(lines[i].replace(0, 2, "").c_str(), &check[i]);
+        return ++i;
+    }
+    if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
+    {
+        ImGui::BulletText(lines[i].c_str());
+        return ++i;
+    }
+    ImGui::Text(lines[i].c_str());
+    return ++i;
+}
 
 int write(std::vector<std::string> lines, int start)
 {
@@ -81,21 +98,7 @@ int write(std::vector<std::string> lines, int start)
                     {
                         break;
                     }
-                    if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
-                    {
-                        ImGui::Checkbox(lines[i].replace(0, 2, "").c_str(), &check[i]);
-                        i++;
-                        continue;
-                    }
-                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
-                    {
-                        ImGui::BulletText(lines[i].c_str());
-                        i++;
-                        continue;
-                    }
-                    ImGui::Text(lines[i].c_str());
-                    i++;
-                    continue;
+                    i = write_sentence(lines, i);
                 }
                 ImGui::TreePop();
             }
@@ -106,21 +109,7 @@ int write(std::vector<std::string> lines, int start)
             i++;
             continue;
         }
-        if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
-        {
-            ImGui::Checkbox(lines[i].replace(0,2,"").c_str(), &check[i]);
-            i++;
-            continue;
-        }
-        if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
-        {
-            ImGui::BulletText(lines[i].c_str());
-            i++;
-            continue;
-        }
-        ImGui::Text(lines[i].c_str());
-        i++;
-        continue;
+        i = write_sentence(lines, i);
     }
 
     return i;
