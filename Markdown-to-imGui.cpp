@@ -16,104 +16,12 @@
 #include <vector>
 #include <deque>
 
-std::deque<bool> check;
-
-std::vector<std::string> read()
-{
-    std::ifstream ifs("test.md");
-    std::string str;
-
-    std::vector<std::string> lines;
-
-    if (ifs.fail()) {
-        return lines;
-    }
-    while (getline(ifs, str)) {
-        lines.push_back(str);
-    }
-
-    check.resize(lines.size());
-
-    return lines;
-}
-
 typedef void (*ImGuiDemoMarkerCallback)(const char* file, int line, const char* section, void* user_data);
 extern ImGuiDemoMarkerCallback  GImGuiDemoMarkerCallback2;
 extern void* GImGuiDemoMarkerCallback2UserData;
 ImGuiDemoMarkerCallback         GImGuiDemoMarkerCallback2 = NULL;
 void* GImGuiDemoMarkerCallback2UserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback2 != NULL) GImGuiDemoMarkerCallback2(__FILE__, __LINE__, section, GImGuiDemoMarkerCallback2UserData); } while (0)
-
-int write_sentence(std::vector<std::string> lines, int start) 
-{
-    int i = start;
-
-    if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
-    {
-        ImGui::Checkbox(lines[i].replace(0, 2, "").c_str(), &check[i]);
-        return ++i;
-    }
-    if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
-    {
-        ImGui::BulletText(lines[i].c_str());
-        return ++i;
-    }
-    ImGui::Text(lines[i].c_str());
-    return ++i;
-}
-
-int write(std::vector<std::string> lines, int start)
-{
-    int i = start;
-    int crntChptrName = -1;
-    bool flg = true;
-    bool node = true;
-
-    while (i < (int)lines.size())
-    {
-        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] != '#')
-        {
-            IMGUI_DEMO_MARKER(lines[i].replace(0,1,"").c_str());
-            flg = ImGui::CollapsingHeader(lines[i].replace(0, 1, "").c_str());
-            node = true;
-            crntChptrName = i;
-            i++;
-            continue;
-        }
-        if (!flg)
-        {
-            i++;
-            continue;
-        }
-        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] == '#')
-        {
-            IMGUI_DEMO_MARKER((lines[crntChptrName].replace(0, 1, "") + "/" + lines[i].replace(0, 2, "")).c_str());
-            node = ImGui::TreeNode(lines[i].replace(0, 2, "").c_str());
-            if (node)
-            {
-                i++;
-                while (i < (int)lines.size())
-                {
-                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '#')
-                    {
-                        break;
-                    }
-                    i = write_sentence(lines, i);
-                }
-                ImGui::TreePop();
-            }
-            continue;
-        }
-        if (!node)
-        {
-            i++;
-            continue;
-        }
-        i = write_sentence(lines, i);
-    }
-
-    return i;
-}
 
 // Data
 static ID3D11Device* g_pd3dDevice = NULL;
@@ -171,6 +79,123 @@ bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_sr
     return true;
 }
 
+std::deque<bool> check;
+
+std::vector<ID3D11ShaderResourceView*> textures;
+
+std::vector<std::string> read()
+{
+    std::ifstream ifs("test.md");
+    std::string str;
+    std::string fname;
+
+    std::vector<std::string> lines;
+
+    int my_image_width = 0;
+    int my_image_height = 0;
+    int image_i = 0;
+
+    if (ifs.fail()) {
+        return lines;
+    }
+    while (getline(ifs, str)) {
+        lines.push_back(str);
+        if (str.size() > 0 && str.c_str()[0] == '!')
+        {
+            ID3D11ShaderResourceView* temp;
+            textures.push_back(temp);
+            fname = str.substr(str.find_first_of("(") + 1, str.find_first_of(")") - 1 - str.find_first_of("("));
+            LoadTextureFromFile(fname.c_str(), &textures.at(textures.size()-1), &my_image_width, &my_image_height);
+        }
+    }
+
+    check.resize(lines.size());
+
+    return lines;
+}
+
+int write_sentence(std::vector<std::string> lines, int start)
+{
+    int i = start;
+    std::string fname;
+
+    int my_image_width = 0;
+    int my_image_height = 0;
+
+    if (lines[i].size() > 1 && lines[i].c_str()[0] == '[' && lines[i].c_str()[1] == ']')
+    {
+        ImGui::Checkbox(lines[i].replace(0, 2, "").c_str(), &check[i]);
+        return ++i;
+    }
+    if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
+    {
+        ImGui::BulletText(lines[i].c_str());
+        return ++i;
+    }
+    if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
+    {
+        ImGui::Image((void*)textures.at(0), ImVec2(128, 128));
+
+        return ++i;
+    }
+    ImGui::Text(lines[i].c_str());
+    return ++i;
+}
+
+int write(std::vector<std::string> lines, int start)
+{
+    int i = start;
+    int image_i = -1;
+    int crntChptrName = -1;
+    bool flg = true;
+    bool node = true;
+
+    while (i < (int)lines.size())
+    {
+        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] != '#')
+        {
+            IMGUI_DEMO_MARKER(lines[i].replace(0, 1, "").c_str());
+            flg = ImGui::CollapsingHeader(lines[i].replace(0, 1, "").c_str());
+            node = true;
+            crntChptrName = i;
+            i++;
+            continue;
+        }
+        if (!flg)
+        {
+            i++;
+            continue;
+        }
+        if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] == '#')
+        {
+            IMGUI_DEMO_MARKER((lines[crntChptrName].replace(0, 1, "") + "/" + lines[i].replace(0, 2, "")).c_str());
+            node = ImGui::TreeNode(lines[i].replace(0, 2, "").c_str());
+            if (node)
+            {
+                i++;
+                while (i < (int)lines.size())
+                {
+                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '#')
+                    {
+                        break;
+                    }
+                    i = write_sentence(lines, i);
+                }
+                ImGui::TreePop();
+            }
+            continue;
+        }
+        if (!node)
+        {
+            i++;
+            continue;
+        }
+        i = write_sentence(lines, i);
+    }
+
+    return i;
+}
+
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
@@ -181,7 +206,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Main code
 int main(int, char**)
 {
-    std::vector<std::string> lines = read();
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -216,10 +240,10 @@ int main(int, char**)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-    int my_image_width = 100;
-    int my_image_height = 100;
-    ID3D11ShaderResourceView* my_texture = NULL;
-    bool ret = LoadTextureFromFile("unnamed.png", &my_texture, &my_image_width, &my_image_height);
+    //int my_image_width = 0;
+    //int my_image_height = 0;
+    //ID3D11ShaderResourceView* my_texture = NULL;
+    //bool ret = LoadTextureFromFile("unnamed.png", &my_texture, &my_image_width, &my_image_height);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -240,6 +264,8 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    std::vector<std::string> lines = read();
 
     // Main loop
     bool done = false;
@@ -278,7 +304,7 @@ int main(int, char**)
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Image((void*)my_texture, ImVec2(128, 128));
+            //ImGui::Image((void*)my_texture, ImVec2(128, 128));
 
             write(lines,0);
 
