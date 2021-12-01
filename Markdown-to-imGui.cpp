@@ -114,7 +114,7 @@ std::vector<std::string> read()
     return lines;
 }
 
-int write_sentence(std::vector<std::string> lines, int start)
+int write_sentence(std::vector<std::string> lines, int start, int image_i)
 {
     int i = start;
     std::string fname;
@@ -134,7 +134,7 @@ int write_sentence(std::vector<std::string> lines, int start)
     }
     if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
     {
-        ImGui::Image((void*)textures.at(0), ImVec2(128, 128));
+        ImGui::Image((void*)textures.at(image_i), ImVec2(128, 128));
 
         return ++i;
     }
@@ -142,9 +142,9 @@ int write_sentence(std::vector<std::string> lines, int start)
     return ++i;
 }
 
-int write(std::vector<std::string> lines, int start)
+int write(std::vector<std::string> lines)
 {
-    int i = start;
+    int i = 0;
     int image_i = -1;
     int crntChptrName = -1;
     bool flg = true;
@@ -152,6 +152,10 @@ int write(std::vector<std::string> lines, int start)
 
     while (i < (int)lines.size())
     {
+        if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
+        {
+            image_i++;
+        }
         if (lines[i].size() > 1 && lines[i].c_str()[0] == '#' && lines[i].c_str()[1] != '#')
         {
             IMGUI_DEMO_MARKER(lines[i].replace(0, 1, "").c_str());
@@ -179,7 +183,7 @@ int write(std::vector<std::string> lines, int start)
                     {
                         break;
                     }
-                    i = write_sentence(lines, i);
+                    i = write_sentence(lines, i, image_i);
                 }
                 ImGui::TreePop();
             }
@@ -190,7 +194,7 @@ int write(std::vector<std::string> lines, int start)
             i++;
             continue;
         }
-        i = write_sentence(lines, i);
+        i = write_sentence(lines, i, image_i);
     }
 
     return i;
@@ -306,7 +310,7 @@ int main(int, char**)
 
             //ImGui::Image((void*)my_texture, ImVec2(128, 128));
 
-            write(lines,0);
+            write(lines);
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
