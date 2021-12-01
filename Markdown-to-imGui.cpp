@@ -30,7 +30,7 @@ static IDXGISwapChain* g_pSwapChain = NULL;
 static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "include/stb_image.h"
+#include "stb_image.h"
 
 // Simple helper function to load an image into a DX11 texture with common settings
 bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
@@ -102,7 +102,7 @@ std::vector<std::string> read()
     }
     while (getline(ifs, str)) {
         lines.push_back(str);
-        if (str.size() > 0 && str.c_str()[0] == '!')
+        if (str.size() > 0 && str.c_str()[0] == '!' && str.find("(") && str.find(")"))
         {
             ID3D11ShaderResourceView* temp;
             int width;
@@ -135,10 +135,10 @@ int write_sentence(std::vector<std::string> lines, int start, int image_i)
     }
     if (lines[i].size() > 0 && lines[i].c_str()[0] == '-')
     {
-        ImGui::BulletText(lines[i].c_str());
+        ImGui::BulletText(lines[i].replace(0, 2, "").c_str());
         return ++i;
     }
-    if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
+    if (lines[i].size() > 0 && lines[i].c_str()[0] == '!' && lines[i].find("(") && lines[i].find(")"))
     {
         ImGui::Image((void*)textures.at(image_i), ImVec2(textures_width.at(image_i), textures_height.at(image_i)));
 
@@ -158,7 +158,7 @@ int write(std::vector<std::string> lines)
 
     while (i < (int)lines.size())
     {
-        if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
+        if (lines[i].size() > 0 && lines[i].c_str()[0] == '!' && lines[i].find("(") && lines[i].find(")"))
         {
             image_i++;
         }
@@ -185,6 +185,10 @@ int write(std::vector<std::string> lines)
                 i++;
                 while (i < (int)lines.size())
                 {
+                    if (lines[i].size() > 0 && lines[i].c_str()[0] == '!' && lines[i].find("(") && lines[i].find(")"))
+                    {
+                        image_i++;
+                    }
                     if (lines[i].size() > 0 && lines[i].c_str()[0] == '#')
                     {
                         break;
