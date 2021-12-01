@@ -82,6 +82,8 @@ bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_sr
 std::deque<bool> check;
 
 std::vector<ID3D11ShaderResourceView*> textures;
+std::vector<int> textures_width;
+std::vector<int> textures_height;
 
 std::vector<std::string> read()
 {
@@ -103,9 +105,13 @@ std::vector<std::string> read()
         if (str.size() > 0 && str.c_str()[0] == '!')
         {
             ID3D11ShaderResourceView* temp;
+            int width;
+            int height;
             textures.push_back(temp);
+            textures_width.push_back(width);
+            textures_height.push_back(height);
             fname = str.substr(str.find_first_of("(") + 1, str.find_first_of(")") - 1 - str.find_first_of("("));
-            LoadTextureFromFile(fname.c_str(), &textures.at(textures.size()-1), &my_image_width, &my_image_height);
+            LoadTextureFromFile(fname.c_str(), &textures.at(textures.size()-1), &textures_width.at(textures.size() - 1), &textures_height.at(textures.size() - 1));
         }
     }
 
@@ -134,7 +140,7 @@ int write_sentence(std::vector<std::string> lines, int start, int image_i)
     }
     if (lines[i].size() > 0 && lines[i].c_str()[0] == '!')
     {
-        ImGui::Image((void*)textures.at(image_i), ImVec2(128, 128));
+        ImGui::Image((void*)textures.at(image_i), ImVec2(textures_width.at(image_i), textures_height.at(image_i)));
 
         return ++i;
     }
