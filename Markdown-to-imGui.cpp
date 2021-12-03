@@ -281,6 +281,17 @@ int main(int, char**)
 
     std::vector<std::string> lines = read();
 
+    // Font has to be built before new frame.
+    // https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+
+    //io.Fonts->AddFontFromFileTTF("font/NotoSansJP-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesJapanese());
+    //io.Fonts->AddFontFromFileTTF("font/NotoSansTC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseFull());
+    //io.Fonts->AddFontFromFileTTF("font/NotoSansSC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    //io.Fonts->AddFontFromFileTTF("font/NotoSansKR-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesKorean());
+    io.Fonts->AddFontFromFileTTF("font/NotoSans-Regular.ttf",   20, NULL, io.Fonts->GetGlyphRangesCyrillic());
+    
+    io.Fonts->Build();
+
     // Main loop
     bool done = false;
     while (!done)
@@ -305,11 +316,14 @@ int main(int, char**)
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
+
         ImGui::NewFrame();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
+        {
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
@@ -317,6 +331,8 @@ int main(int, char**)
             static int counter = 0;
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+            ImGui::SetWindowFontScale(1.0f);
 
             //ImGui::Image((void*)my_texture, ImVec2(128, 128));
 

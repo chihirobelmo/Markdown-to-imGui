@@ -1,3 +1,13 @@
+Language localization test
+- Language localization test
+- Prueba de localización de idiomas
+- Δοκιμή γλωσσικού εντοπισμού
+- Тест на локализацию языка
+- 语言本地化测试
+- 言語ローカライズテスト
+- 안녕하세요
+
+
 # 1st Sweep: Before starting the engine
 Looking towards the back of the left console, 
 we start by setting the systems correctly, 
@@ -137,7 +147,7 @@ So make sure you start this sweep with the MAIN PWR switch in MAIN PWR.
 Moving forward you can 
 []close the canopy. 
 The canopy features a motor switch to lower or raise the canopy and a 
-switch guard commonly referred to as the “yellow spider” that locks 
+switch guard commonly referred to as the “yellow spider?��? that locks 
 and seals the canopy in place and start the pressurisation.
 ![](images/02-02.jpg)
 Both are now functional in BMS. To lower the canopy right click 
