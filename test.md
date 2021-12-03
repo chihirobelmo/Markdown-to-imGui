@@ -6,6 +6,8 @@ Language localization test
 - 语言本地化测试
 - 言語ローカライズテスト
 - 안녕하세요
+- Test de localisation de la langue
+- Prüfung der Sprachlokalisierung
 
 
 # 1st Sweep: Before starting the engine

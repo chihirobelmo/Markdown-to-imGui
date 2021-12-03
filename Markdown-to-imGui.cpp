@@ -284,11 +284,25 @@ int main(int, char**)
     // Font has to be built before new frame.
     // https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
 
-    //io.Fonts->AddFontFromFileTTF("font/NotoSansJP-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //io.Fonts->AddFontFromFileTTF("font/NotoSansTC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseFull());
-    //io.Fonts->AddFontFromFileTTF("font/NotoSansSC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-    //io.Fonts->AddFontFromFileTTF("font/NotoSansKR-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesKorean());
-    io.Fonts->AddFontFromFileTTF("font/NotoSans-Regular.ttf",   20, NULL, io.Fonts->GetGlyphRangesCyrillic());
+    switch (GetUserDefaultUILanguage() & 0x3ff)
+    {
+    case LANG_JAPANESE:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansJP-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesJapanese());
+        break;
+    case LANG_CHINESE_TRADITIONAL:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansTC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        break;
+    case LANG_CHINESE_SIMPLIFIED:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansSC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+        break;
+    case LANG_KOREAN:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansKR-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesKorean());
+        break;
+    default:
+        io.Fonts->AddFontFromFileTTF("font/NotoSans-Regular.ttf", 30, NULL, io.Fonts->GetGlyphRangesCyrillic());
+        break;
+    }
+
     
     io.Fonts->Build();
 
