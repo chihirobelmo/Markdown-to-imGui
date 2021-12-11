@@ -23,7 +23,7 @@ On the EXT LIGHTING panel we set the
 Note that the WING/TAIL & FUSELAGE switches move together 
 as they share a common callback in BMS. 
 The FORM and AERIAL REFUELING knobs are not implemented in the current version of BMS.
-You won’t immediately see the lights come on as the jet doesn’t have power yet. 
+You won't immediately see the lights come on as the jet doesn't have power yet. 
 The lights will only come on when the main generator comes online during engine start.
 ![](images/01-01.jpg)
 
@@ -59,9 +59,9 @@ You can now
 The lights reset to their initial state. This check is eye candy and is not mandatory. 
 Leave the MAIN PWR switch in BATT for now; we will start the engines after we have finished the pre-start checks.
 ## AUDIO panel
-Let’s set the comms so we’re quickly ready to use the radio after engine start. 
+Let's set the comms so we're quickly ready to use the radio after engine start. 
 Moving forward to the AUDIO1 panel we 
-[]rotate the COMM1 (UHF) volume knob out of OFF clockwise to the 12 o’clock position and 
+[]rotate the COMM1 (UHF) volume knob out of OFF clockwise to the 12 o'clock position and 
 []do the same for COMM2 (VHF).
 
 ![](images/01-04.jpg)
@@ -71,9 +71,9 @@ Note also that for the backup UHF panel to work the COMM1 volume on the AUDIO1 p
 
 The two mode knobs for COMM1&2 should already be set to SQL and do not need to be moved for ramp start. 
 They have no function anyway with the CNI switch in the BACKUP position. 
-Set the MSL & THREAT volumes to 12 o’clock. 
+Set the MSL & THREAT volumes to 12 o'clock. 
 These two do not have ON/OFF switches at the CCW position but are very often forgotten, 
-which may cause problems later if you don’t notice you’ve been locked up or fired upon!
+which may cause problems later if you don't notice you've been locked up or fired upon!
 
 []The ILS knob needs to be powered for the ILS system to work. 
 The ILS audio volume is now implemented and sets the volume of the marker sound. 
@@ -114,7 +114,7 @@ you can set up the LIGHTING panel accordingly.
 can be rotated clockwise.
 ![](images/01-08.jpg)
 The highlighted knobs are not implemented. Please note as the aircraft 
-doesn’t yet have main power the lights won’t come on when you move the switch; 
+doesn't yet have main power the lights won't come on when you move the switch; 
 only when the relevant buses receive power.
 Note: a spotlight is also available for night ramp starts. 
 This is available as soon as the MAIN PWR switch is moved to BATT, 
@@ -198,7 +198,7 @@ the rate of FTIT increase is not proportional to RPM but much faster.
 With the engine running steadily you can check the remaining engine gauges 
 such as fuel flow (700-1700 PPH), nozzle position (greater than 94%), 
 FTIT (usually below 650°C but never above 800°C), 
-HYD A & B pressure (at the 12 o’clock position) and 3 green gear lights.
+HYD A & B pressure (at the 12 o'clock position) and 3 green gear lights.
 ## TEST panel   
 Move back to the TEST panel and 
 []test PROBEHEAT, 
@@ -216,7 +216,7 @@ Move back to the TEST panel and
 
 Press and hold the MAL & IND LTS button and check correct operation 
 of the Voice Message System (VMS) and that all lights are illuminated. 
-If you don’t hear any sounds check the INTERCOM knob.
+If you don't hear any sounds check the INTERCOM knob.
 
 Flip the PROBE HEAT switch to the upper position and check that the MASTER CAUTION light remains off. 
 Move the switch to the lower TEST position and check that PROBE HEAT flashes on the caution panel. 
