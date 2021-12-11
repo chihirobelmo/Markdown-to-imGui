@@ -32,6 +32,61 @@ static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+void GetDesktopResolution(int& horizontal, int& vertical)
+{
+    RECT desktop;
+
+    // Get a handle to the desktop window
+    const HWND hDesktop = GetDesktopWindow();
+
+    // Get the size of screen to the variable desktop
+    GetWindowRect(hDesktop, &desktop);
+
+    // The top left corner will have coordinates (0,0)
+    // and the bottom right corner will have coordinates
+    // (horizontal, vertical)
+    horizontal = desktop.right;
+    vertical = desktop.bottom;
+}
+
+double screenDpi()
+{
+    SetProcessDPIAware(); //true
+
+    HDC screen = GetDC(NULL);
+
+    double hPixelsPerInch = GetDeviceCaps(screen, LOGPIXELSX);
+    double vPixelsPerInch = GetDeviceCaps(screen, LOGPIXELSY);
+
+    ReleaseDC(NULL, screen);
+
+    return (hPixelsPerInch + vPixelsPerInch) * 0.5 / 96;
+}
+
+void applyUserLang(ImGuiIO& io, double dpi)
+{
+    switch (GetUserDefaultUILanguage() & 0x3ff)
+    {
+    case LANG_JAPANESE:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansJP-Regular.otf", 18 * dpi, NULL, io.Fonts->GetGlyphRangesJapanese());
+        break;
+    case LANG_CHINESE_TRADITIONAL: // need some fix
+        io.Fonts->AddFontFromFileTTF("font/NotoSansTC-Regular.otf", 18 * dpi, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        break;
+    case LANG_CHINESE_SIMPLIFIED:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansSC-Regular.otf", 18 * dpi, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+        break;
+    case LANG_KOREAN:
+        io.Fonts->AddFontFromFileTTF("font/NotoSansKR-Regular.otf", 18 * dpi, NULL, io.Fonts->GetGlyphRangesKorean());
+        break;
+    default:
+        io.Fonts->AddFontFromFileTTF("font/NotoSans-Regular.ttf", 18 * dpi, NULL, io.Fonts->GetGlyphRangesCyrillic());
+        break;
+    }
+
+    io.Fonts->Build();
+}
+
 // Simple helper function to load an image into a DX11 texture with common settings
 bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
 {
@@ -85,11 +140,10 @@ std::vector<ID3D11ShaderResourceView*> textures;
 std::vector<int> textures_width;
 std::vector<int> textures_height;
 
-std::vector<std::string> read()
+std::vector<std::string> read(std::string fname)
 {
-    std::ifstream ifs("test.md");
+    std::ifstream ifs(fname);
     std::string str;
-    std::string fname;
 
     std::vector<std::string> lines;
 
@@ -220,12 +274,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Main code
 int main(int, char**)
 {
+    int horizontal;
+    int vertical;
+
+    GetDesktopResolution(horizontal, vertical);
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX11 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Markdown to imgui example"), WS_OVERLAPPEDWINDOW, 0, 0, horizontal * screenDpi(), vertical * screenDpi(), NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -254,63 +312,48 @@ int main(int, char**)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-    //int my_image_width = 0;
-    //int my_image_height = 0;
-    //ID3D11ShaderResourceView* my_texture = NULL;
-    //bool ret = LoadTextureFromFile("unnamed.png", &my_texture, &my_image_width, &my_image_height);
-
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
-
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    std::vector<std::string> lines = read();
 
-    // Font has to be built before new frame.
-    // https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+
+    //
+    //
+    // read markdown file.
+    std::string fname;
 
     switch (GetUserDefaultUILanguage() & 0x3ff)
     {
     case LANG_JAPANESE:
-        io.Fonts->AddFontFromFileTTF("font/NotoSansJP-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesJapanese());
-        break;
-    case LANG_CHINESE_TRADITIONAL:
-        io.Fonts->AddFontFromFileTTF("font/NotoSansTC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        break;
-    case LANG_CHINESE_SIMPLIFIED:
-        io.Fonts->AddFontFromFileTTF("font/NotoSansSC-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-        break;
-    case LANG_KOREAN:
-        io.Fonts->AddFontFromFileTTF("font/NotoSansKR-Regular.otf", 20, NULL, io.Fonts->GetGlyphRangesKorean());
+        fname = "test-jp.md";
         break;
     default:
-        io.Fonts->AddFontFromFileTTF("font/NotoSans-Regular.ttf", 30, NULL, io.Fonts->GetGlyphRangesCyrillic());
+        fname = "test.md";
         break;
     }
 
-    
-    io.Fonts->Build();
+    std::vector<std::string> lines = read(fname);
+    // read markdown file end.
+    //
+    //
+
+    //
+    // Font has to be built before new frame.
+    // https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+    // select font depends on the user language.
+    applyUserLang(io, screenDpi());
+    //
+    //
+    //
+
+
 
     // Main loop
     bool done = false;
     while (!done)
     {
-
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -336,45 +379,18 @@ int main(int, char**)
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
         {
-            ImGui::ShowDemoWindow(&show_demo_window);
+            //ImGui::ShowDemoWindow(&show_demo_window);
         }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("Markdown read test");
 
             ImGui::SetWindowFontScale(1.0f);
 
-            //ImGui::Image((void*)my_texture, ImVec2(128, 128));
-
             write(lines);
 
-            //ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            //ImGui::Checkbox("Another Window", &show_another_window);
-
-            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            //    counter++;
-            //ImGui::SameLine();
-            //ImGui::Text("counter = %d", counter);
-
             //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
             ImGui::End();
         }
 
